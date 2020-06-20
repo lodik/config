@@ -335,9 +335,14 @@ public class ConfigBeanImpl {
 
     private static boolean hasPropertiesBindedToConstructor(Class<?> clazz) {
         for (Constructor<?> constructor : clazz.getConstructors()) {
-            ConstructorProperties annotation = constructor.getAnnotation(ConstructorProperties.class);
-            if (annotation != null) {
-                return true;
+            if ((constructor.getModifiers() & Modifier.PUBLIC) != 0) {
+                ConstructorProperties annotation = constructor.getAnnotation(ConstructorProperties.class);
+                if (annotation != null) {
+                    return true;
+                }
+                if (constructor.getParameterCount() > 0 && constructor.getParameters()[0].isNamePresent()) {
+                    return true;
+                }
             }
         }
         return false;
