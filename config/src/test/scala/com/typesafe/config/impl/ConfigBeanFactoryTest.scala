@@ -9,6 +9,7 @@ import java.io.{ InputStream, InputStreamReader }
 import java.time.Duration
 
 import beanconfig.ConstructorConfig.NestedConfig
+import beanconfig.ConstructorConfig.ConstructorConfigSkipWithoutAnnotation
 import beanconfig._
 import org.junit.Assert._
 import org.junit._
@@ -281,7 +282,8 @@ class ConfigBeanFactoryTest extends TestUtils {
 
     @Test
     def testConstructor(): Unit = {
-        val bean = ConfigBeanFactory.create(loadConfig().getConfig("constructor"), classOf[ConstructorConfig])
+        val cls = compiledWithNames() ? classOf[ConstructorConfig] : classOf[ConstructorConfigSkipWithoutAnnotation]
+        val bean = ConfigBeanFactory.create(loadConfig().getConfig("constructor"), cls)
         val nestedBean = bean.getNested
         val nestedNoAnnotation = bean.getNestedWithoutAnnotation
 
@@ -303,9 +305,7 @@ class ConfigBeanFactoryTest extends TestUtils {
 
     @Test
     def testNoAnnotationSingleConstructor(): Unit = {
-        val names = classOf[ConstructorConfigNoAnnotation].getConstructor(classOf[String], classOf[String], classOf[NestedConfig]).getParameters()(0).isNamePresent
-
-        if (names) {
+        if (compiledWithNames()) {
             val bean = ConfigBeanFactory.create(loadConfig().getConfig("constructor"), classOf[ConstructorConfigNoAnnotation])
             val nestedBean = bean.getNested
 
@@ -320,6 +320,10 @@ class ConfigBeanFactoryTest extends TestUtils {
             }
             assertTrue("no constructor", e.getMessage.contains("needs a single public constructor"))
         }
+    }
+
+    private def compiledWithNames(): boolean = {
+        classOf[ConstructorConfigNoAnnotation].getConstructor(classOf[String], classOf[String], classOf[NestedConfig]).getParameters()(0).isNamePresent
     }
 
     private def loadConfig(): Config = {

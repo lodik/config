@@ -67,4 +67,23 @@ public class ConstructorConfig {
       return foo;
     }
   }
+
+  public static class ConstructorConfigSkipWithoutAnnotation extends ConstructorConfig {
+
+    @ConstructorProperties({"foo", "bar", "nested", "nestedWithoutAnnotation"})
+    public ConstructorConfigSkipWithoutAnnotation(String foo, @Optional String bar, NestedConfig nested, NestedWithAnnotation nestedWithAnnotation) {
+        super(foo, bar, nested, nestedWithAnnotation);
+    }
+
+  }
+
+  public static class NestedWithAnnotation extends NestedWithoutAnnotation {
+
+      @ConstructorProperties({"foo"})
+      public NestedWithAnnotation(String foo) {
+        super(foo);
+      }
+
+    }
+
 }
