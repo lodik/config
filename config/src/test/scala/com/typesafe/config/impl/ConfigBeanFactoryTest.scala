@@ -3,11 +3,12 @@
  */
 package com.typesafe.config.impl
 
-import beanconfig.EnumsConfig.{Problem, Solution}
-import com.typesafe.config.{ConfigBeanFactory, _}
-import java.io.{InputStream, InputStreamReader}
+import beanconfig.EnumsConfig.{ Problem, Solution }
+import com.typesafe.config.{ ConfigBeanFactory, _ }
+import java.io.{ InputStream, InputStreamReader }
 import java.time.Duration
 
+import beanconfig.ConstructorConfig.NestedConfig
 import beanconfig._
 import org.junit.Assert._
 import org.junit._
@@ -282,12 +283,14 @@ class ConfigBeanFactoryTest extends TestUtils {
     def testConstructor(): Unit = {
         val bean = ConfigBeanFactory.create(loadConfig().getConfig("constructor"), classOf[ConstructorConfig])
         val nestedBean = bean.getNested
+        val nestedNoAnnotation = bean.getNestedWithoutAnnotation
 
         assertEquals("foo", "fooString", bean.getFoo)
         assertNull("bar", bean.getBar)
         assertNotNull("nested", nestedBean)
         assertEquals("nestedFooString", nestedBean.getFoo)
         assertEquals("baz", "bazString", bean.getBaz)
+        assertEquals("nestedWithoutAnnotationString", nestedNoAnnotation.getFoo)
     }
 
     @Test
@@ -300,7 +303,7 @@ class ConfigBeanFactoryTest extends TestUtils {
 
     @Test
     def testNoAnnotationSingleConstructor(): Unit = {
-        val names = classOf[ConstructorConfigNoAnnotation].getConstructor(classOf[String], classOf[String], classOf[NestedConfig]).getParameters()[0].isNamePresent();
+        val names = classOf[ConstructorConfigNoAnnotation].getConstructor(classOf[String], classOf[String], classOf[NestedConfig]).getParameters()(0).isNamePresent
 
         if (names) {
             val bean = ConfigBeanFactory.create(loadConfig().getConfig("constructor"), classOf[ConstructorConfigNoAnnotation])
